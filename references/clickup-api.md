@@ -9,6 +9,10 @@ Read this file only when something goes wrong or behaves in a surprising way.
 | Token owner | `/user` |
 | Workspaces + members | `/team` |
 | Space names | `/team/{team_id}/space` |
+| Folders / lists / sprints (`--discover`) | `/space/{id}/folder`, `/space/{id}/list` |
+| Tags of a space (`--discover`) | `/space/{id}/tag` |
+| Tasks of one sprint | `/list/{list_id}/task?assignees[]=…&include_closed=true` |
+| Tasks of a list / folder / space / tag | `/team/{team_id}/task?list_ids[]=… \| project_ids[]=… \| space_ids[]=… \| tags[]=…` (a folder is a "project" in the API) |
 | Tasks of a user | `/team/{team_id}/task?assignees[]={user_id}&subtasks=true&include_closed=…&page=N` |
 | Task comments | `/task/{task_id}/comment` |
 

@@ -1,14 +1,24 @@
 # clickup-report — a Claude Code skill
 
-Turn your ClickUp tickets into a **meeting-ready Markdown report** in one
-sentence:
+Turn your ClickUp tickets into a **colorful, meeting-ready report in Arabic**
+(an HTML page or a Markdown file). Each run asks where the tickets are (a
+sprint, list, folder, space, tag or period), which status columns, and which
+format. Start it with one sentence:
 
 > make my clickup report for my meeting with my manager
 
-Claude reads every ticket you are assigned in the **latest sprint**: the full
-description and the latest comments. It then writes a report organized **by
-sprint → by status**, with a short summary of each ticket, the risks, and
-talking points you can say out loud.
+Claude asks three quick click-to-answer questions:
+
+1. **Where?** the latest sprint, another sprint, a folder, list or space, a tag,
+   or a date period (the choices come live from your workspace)
+2. **Which columns?** e.g. only `in progress`, or `ready for qa` + `done`
+   (each shown with how many of your tickets are in it)
+3. **Which format?** an HTML page, a Markdown file, or both
+
+Then it reads every matching ticket you are assigned (the full description and
+the latest comments) and writes a report organized **by sprint → by status
+column**, with a short Arabic summary of each ticket, the risks, and talking
+points you can say out loud.
 
 It works for any developer, whatever language or framework you use: the skill
 only talks to ClickUp.
@@ -17,30 +27,31 @@ only talks to ClickUp.
 
 ## What you get
 
-```
-# Sprint report — Jane Doe
-Sprint: Sprint 12 (2026-03-02 → 2026-03-15) · Where: Web App / Sprints
+**HTML page** (right-to-left, light and dark mode, prints cleanly to PDF):
+- a gradient header with the sprint / place, the chosen columns and the date
+- colored KPI tiles: done, in progress, to do, at risk, total, and a progress bar
+- the executive summary and the talking points side by side
+- a red *Blocked / at risk* table and a count table per status column
+- one card per ticket, in its ClickUp column color, with priority / due date /
+  time chips and the summary
 
-## Executive summary          ← 3–5 bullets: outcomes, counts, biggest risk, what's next
-## At a glance                ← counts per status + key metrics
-   | Sprint    | to do | in progress | in review | done | Total |
-   | Sprint 12 |   2   |      3      |     1     |  4   |  10   |
-## Blocked / at risk          ← overdue, blocked, stale, QA send-backs, "can't test" comments
-## Talking points             ← sentences you can say in the meeting
-## Tasks by sprint / list
-### Sprint 12 (10)
-#### To do (2)
+**Markdown file** (renders in VS Code, GitHub and Obsidian):
+
+```
+<div dir="rtl">
+# 📊 تقرير السبرنت — Jane Doe
+> السبرنت: Sprint 12 (2026-03-02 → 2026-03-15) · الأعمدة: كل الأعمدة
+## 📈 نظرة سريعة          ← ✅ done · 🔵 in progress · ⚪ to do · ⚠️ at risk + 🟩⬜ progress bar
+## 🧭 الملخص التنفيذي      ← > [!TIP] callout: outcomes, counts, biggest risk, what's next
+## 🎤 نقاط للحديث          ← > [!IMPORTANT] callout: sentences to say in the meeting
+## 🚧 العوائق والمخاطر      ← > [!WARNING] callout + table
+## 🗂️ المهام حسب السبرنت
+### 📁 Sprint 12 (10)
+#### 🟣 Ready for qa (2)
 ##### [Add CSV export to the orders page](https://app.clickup.com/t/…)
-Status: to do · Priority: high · Due: 2026-03-12
-Admins need to export filtered orders to CSV for the finance team. Work has not started;
-the product owner confirmed the column list in a comment on 03-04.
-#### In progress (3)
-…
-#### In review (1)
-…
-#### Done (4)
-…
-## Data notes                 ← anything the data could not show (e.g. no time tracking)
+`🟣 ready for qa` · 🟠 الأولوية: عالية · 📅 موعد التسليم: 2026-03-12
+📝 short Arabic summary: the goal, what happened, where it stands now
+</div>
 ```
 
 Statuses use **your workspace's own names and order** ("ready for qa",
@@ -52,6 +63,13 @@ Statuses use **your workspace's own names and order** ("ready for qa",
   API token. It checks them against the ClickUp API and saves them. If you
   don't know your user id, it looks it up from the token and asks you to
   confirm.
+- **Three questions every run:** where the tickets are, which status columns,
+  and HTML or Markdown. The options are loaded live from your workspace.
+- **Arabic by default:** labels, layout (right-to-left) and summaries are in
+  Arabic. Task names stay exactly as they are in ClickUp. Set
+  `--language English` for English labels.
+- **Nothing half-done:** the build refuses to write the report until every
+  ticket has a summary.
 - **Latest sprint by date:** it finds the sprint with the most recent start
   date that has already started. A sprint created in advance is skipped. You
   can also ask for a named sprint, or a date period ("last 14 days").
@@ -93,9 +111,11 @@ Just ask:
 | `report for the last sprint for my 1:1` | the latest sprint, chosen by date |
 | `clickup report for Sprint 6` | that sprint (Claude asks if the name matches several lists) |
 | `what did I do in the last 14 days in clickup` | a date period instead of a sprint |
+| `HTML report of my ready-for-qa tickets in Sprint 7` | answers all three questions at once |
+| `report on my "laravel dashboard" tag` | every ticket with that tag |
 | `/clickup-report` | runs the skill directly |
 
-Reports are saved to `~/clickup-reports/clickup-report-<date>.md`.
+Reports are saved to `~/clickup-reports/clickup-report-<date>.html` or `.md`.
 
 ### First run
 
@@ -107,7 +127,7 @@ Claude asks for:
 3. **API token**: in ClickUp, *Settings → Apps → API Token* (starts with
    `pk_`).
 
-Optional: the report folder, the report language (default English), and the
+Optional: the report folder, the report language (default Arabic), and the
 default scope ("latest sprint" or "ask me each time").
 
 **To keep the token out of the chat,** run the setup yourself in a terminal.
@@ -147,10 +167,10 @@ Or ask Claude, for example: *"change my clickup token"*.
 
 | File | Role |
 |---|---|
-| `SKILL.md` | The instructions Claude follows (ask → fetch → build → write summaries → check) |
+| `SKILL.md` | The instructions Claude follows (ask 3 questions → fetch → write summaries → build → check) |
 | `scripts/setup_config.py` | First-run setup, validation, id discovery, preferences, reset |
-| `scripts/fetch_tasks.py` | Finds the sprint, fetches your tasks and comments, sorts them, flags risks |
-| `scripts/build_report.py` | Renders the Markdown and leaves markers where Claude writes the summaries |
+| `scripts/fetch_tasks.py` | Lists the choices (`--discover`), shows the status columns (`--peek`), fetches your tasks and comments, flags risks |
+| `scripts/build_report.py` | Renders the HTML or Markdown report from the task data and Claude's `summaries.json` |
 | `scripts/clickup_client.py` | Config storage and a small read-only ClickUp API v2 client (retries, rate limits) |
 | `references/clickup-api.md` | API notes and troubleshooting |
 

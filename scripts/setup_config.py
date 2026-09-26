@@ -34,7 +34,7 @@ from clickup_client import (ClickUpError, config_path, emit, get, load_config,  
 GROUP_CHOICES = ("list", "folder", "space", "tag", "status")
 DEFAULTS = {
     "report_dir": str(Path.home() / "clickup-reports"),
-    "language": "English",
+    "language": "Arabic",
     "group_by": "list",
     "default_scope": "ask",
 }
